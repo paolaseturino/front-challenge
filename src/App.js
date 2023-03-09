@@ -8,7 +8,6 @@ const App = () => {
 
 
   useEffect(() => {
-
     if(backgrounds.length == 0) {
       fetch('https://jsonplaceholder.typicode.com/photos')
         .then(response => response.json())
@@ -42,14 +41,8 @@ const App = () => {
   };
 
   const RemoveMoveable = () => {
-    console.log(selected);
-    const newList = []
-     moveableComponents.map((moveable, i) => {
-      if (moveable.id !== selected) {
-        newList.push (moveable)
-      }
-    })
-    setMoveableComponents(newList)
+    setMoveableComponents(moveableComponents.filter(item => item.id !== selected))
+
   }
   
   const updateMoveable = (id, newComponent, updateEnd = false, e = null) => {
@@ -255,15 +248,7 @@ const Component = ({
             target.style.transform = transform;
           }
         }
-        
-        onResize={({
-          target, width, height,
-                dist, delta, direction,
-                clientX, clientY,
-        }) => {
-          delta[0] && (target.style.width = `${width}px`);
-          delta[1] && (target.style.height = `${height}px`);
-        }}
+        onResize={onResize}
         //onResizeEnd={onResizeEnd}
         keepRatio={false}
         //throttleResize={1}
