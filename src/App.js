@@ -1,9 +1,29 @@
 import React, { useRef, useState, useEffect } from "react";
 import Moveable from "react-moveable";
+import {getImage} from "./services/getImages";
 
 const App = () => {
   const [moveableComponents, setMoveableComponents] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(null);  
+  const [backgrounds, setBack] = useState([])
+
+
+  useEffect(() => {
+
+    if(backgrounds.length == 0) {
+      fetch('https://jsonplaceholder.typicode.com/photos')
+        .then(response => response.json())
+        .then(data => {
+          setBack(data)
+          }
+        );
+    }
+  }, [])
+
+  const getRandom = () => {
+    return Math.floor(Math.random() * backgrounds.length)
+  }
+  
 
   const addMoveable = () => {
     // Create a new moveable component and add it to the array
@@ -17,13 +37,23 @@ const App = () => {
         left: 0,
         width: 100,
         height: 100,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        updateEnd: true
+        url: (backgrounds[getRandom()].url),
+        updateEnd: true,
       },
     ]);
   };
-
-  const updateMoveable = (id, newComponent, updateEnd = false) => {
+  
+  const updateMoveable = (id, newComponent, updateEnd = false, e = null) => {
+    /* console.log(e.target);
+    console.log(newComponent.top); */
+    // Create new comp
+    newComponent = {
+      top : e.top,
+      left : e.left,
+      width : e.width,
+      height: e.height,
+      ...newComponent
+      }
     const updatedMoveables = moveableComponents.map((moveable, i) => {
       if (moveable.id === id) {
         return { id, ...newComponent, updateEnd };
@@ -90,7 +120,7 @@ const Component = ({
   width,
   height,
   index,
-  color,
+  url,
   id,
   setSelected,
   isSelected = false,
@@ -104,7 +134,7 @@ const Component = ({
     width,
     height,
     index,
-    color,
+    url,
     id,
   });
 
@@ -129,8 +159,8 @@ const Component = ({
       left,
       width: newWidth,
       height: newHeight,
-      color,
-    });
+      url,
+    }, false, e);
 
     // ACTUALIZAR NODO REFERENCIA
     const beforeTranslate = e.drag.beforeTranslate;
@@ -178,7 +208,7 @@ const Component = ({
         left: absoluteLeft,
         width: newWidth,
         height: newHeight,
-        color,
+        url,
       },
       true
     );
@@ -196,28 +226,39 @@ const Component = ({
           left: left,
           width: width,
           height: height,
-          background: color,
+          backgroundImage: `url(${url})`,
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat'
         }}
         onClick={() => setSelected(id)}
-      />
+      >
+      </div>
 
       <Moveable
         target={isSelected && ref.current}
         resizable
         draggable
-        onDrag={(e) => {
-          updateMoveable(id, {
-            top: e.top,
-            left: e.left,
-            width,
-            height,
-            color,
-          });
+        //throttleDrag={1}
+        onDrag={({
+          target,
+          transform,
+          }) => {
+            target.style.transform = transform;
+          }
+        }
+        onResize={({
+          target,
+          width,
+          height,
+          delta,
+        }) => {
+          delta[0] && (target.style.width = `${width}px`);
+          delta[1] && (target.style.height = `${height}px`);
         }}
-        onResize={onResize}
-        onResizeEnd={onResizeEnd}
+        //onResizeEnd={onResizeEnd}
         keepRatio={false}
-        throttleResize={1}
+        //throttleResize={1}
         renderDirections={["nw", "n", "ne", "w", "e", "sw", "s", "se"]}
         edge={false}
         zoom={1}
