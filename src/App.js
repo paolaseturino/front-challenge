@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import Moveable from "react-moveable";
-import {getImage} from "./services/getImages";
 
 const App = () => {
   const [moveableComponents, setMoveableComponents] = useState([]);
@@ -24,7 +23,6 @@ const App = () => {
     return Math.floor(Math.random() * backgrounds.length)
   }
   
-
   const addMoveable = () => {
     // Create a new moveable component and add it to the array
     const COLORS = ["red", "blue", "yellow", "green", "purple"];
@@ -42,10 +40,19 @@ const App = () => {
       },
     ]);
   };
+
+  const RemoveMoveable = () => {
+    console.log(selected);
+    const newList = []
+     moveableComponents.map((moveable, i) => {
+      if (moveable.id !== selected) {
+        newList.push (moveable)
+      }
+    })
+    setMoveableComponents(newList)
+  }
   
   const updateMoveable = (id, newComponent, updateEnd = false, e = null) => {
-    /* console.log(e.target);
-    console.log(newComponent.top); */
     // Create new comp
     newComponent = {
       top : e.top,
@@ -87,6 +94,7 @@ const App = () => {
   return (
     <main style={{ height : "100vh", width: "100vw" }}>
       <button onClick={addMoveable}>Add Moveable1</button>
+      <button onClick={RemoveMoveable}>Remove Selected Moveable</button>
       <div
         id="parent"
         style={{
@@ -247,11 +255,11 @@ const Component = ({
             target.style.transform = transform;
           }
         }
+        
         onResize={({
-          target,
-          width,
-          height,
-          delta,
+          target, width, height,
+                dist, delta, direction,
+                clientX, clientY,
         }) => {
           delta[0] && (target.style.width = `${width}px`);
           delta[1] && (target.style.height = `${height}px`);
